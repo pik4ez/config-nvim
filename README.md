@@ -2,6 +2,12 @@
 
 Based on [Lazy.nvim](https://lazy.folke.io/).
 
+## Requirements
+
+```
+neovim>=0.10
+```
+
 ## Installation
 
 ```
