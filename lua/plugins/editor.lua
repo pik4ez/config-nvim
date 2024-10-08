@@ -131,4 +131,71 @@ return {
 			}
 		end,
 	},
+	{
+		"echasnovski/mini.pairs",
+		event = "VeryLazy",
+		opts = {
+			modes = { insert = true, command = false, terminal = false },
+			-- skip autopair when next character is one of these
+			skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+			-- skip autopair when the cursor is inside these treesitter nodes
+			skip_ts = { "string" },
+			-- skip autopair when next character is closing pair
+			-- and there are more closing pairs than opening pairs
+			skip_unbalanced = true,
+			-- better deal with markdown code blocks
+			markdown = true,
+		},
+	},
+	{
+		"kylechui/nvim-surround",
+		version = "*", -- Use for stability; omit to use `main` branch for the latest features
+		event = "VeryLazy",
+		opts = function()
+			return {
+				surrounds = {
+					["l"] = {
+						add = function()
+							local clipboard = vim.fn.getreg("+"):gsub("\n", "")
+							return {
+								{ "[" },
+								{ "](" .. clipboard .. ")" },
+							}
+						end,
+						find = "%b[]%b()",
+						delete = "^(%[)().-(%]%b())()$",
+						change = {
+							target = "^()()%b[]%((.-)()%)$",
+							replacement = function()
+								local clipboard = vim.fn.getreg("+"):gsub("\n", "")
+								return {
+									{ "" },
+									{ clipboard },
+								}
+							end,
+						},
+					},
+				},
+			}
+		end,
+	},
+	{
+		-- Install markdown preview, use npx if available.
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		ft = { "markdown" },
+		build = function(plugin)
+			if vim.fn.executable("npx") then
+				vim.cmd("!cd " .. plugin.dir .. " && cd app && npx --yes yarn install")
+			else
+				vim.cmd([[Lazy load markdown-preview.nvim]])
+				vim.fn["mkdp#util#install"]()
+			end
+		end,
+		init = function()
+			if vim.fn.executable("npx") then
+				vim.g.mkdp_filetypes = { "markdown" }
+			end
+		end,
+	},
 }
